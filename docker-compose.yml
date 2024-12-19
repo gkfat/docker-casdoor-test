@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  casdoor:
+    image: casbin/casdoor
+    depends_on:
+      - casdoor_db
+    container_name: casdoor
+    ports:
+      - '8000:8000'
+    environment:
+      dataSourceName: ${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(casdoor_db:3306)/
+    networks:
+      - auth-provider
+
+  casdoor_db:
+    image: mysql:5.7
+    container_name: casdoor_db
+    restart: always
+    ports:
+      - '23306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command:
+      [
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_unicode_ci",
+        "--transaction-isolation=READ-COMMITTED",
+        "--binlog-format=ROW",
+      ]
+    networks:
+      - auth-provider
+
+networks:
+  auth-provider:
+    driver: bridge
